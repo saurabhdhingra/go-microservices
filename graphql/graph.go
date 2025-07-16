@@ -2,30 +2,33 @@ package main
 
 import (
 	"github.com/99designs/gqlgen/graphql"
-	
-	"github.com/stripe/stripe-go/account"
-	"github.com/stripe/stripe-go/order"
-
-
+	"github.com/akhilsharma90/go-graphql-microservice/account"
+	"github.com/akhilsharma90/go-graphql-microservice/catalog"
+	"github.com/akhilsharma90/go-graphql-microservice/order"
 )
 
 type Server struct {
-	// accountClient 	*account.Client
-	// catalogClient	*catalog.Client
-	// orderClient		*order.Client
+	accountClient *account.Client
+	catalogClient *catalog.Client
+	orderClient   *order.Client
 }
 
-func NewGraphQLServer(accountUrl, catalogUrl, orderUrl string) (*Server, error) {
+func NewGraphQLServer(accountUrl, catalogURL, orderURL string) (*Server, error) {
+	// Connect to account service
 	accountClient, err := account.NewClient(accountUrl)
 	if err != nil {
 		return nil, err
 	}
-	catalogClient, err := catalog.NewClient(catalogUrl)
+
+	// Connect to product service
+	catalogClient, err := catalog.NewClient(catalogURL)
 	if err != nil {
 		accountClient.Close()
 		return nil, err
 	}
-	orderClient, err := order.NewClient(orderUrl)
+
+	// Connect to order service
+	orderClient, err := order.NewClient(orderURL)
 	if err != nil {
 		accountClient.Close()
 		catalogClient.Close()
@@ -33,34 +36,32 @@ func NewGraphQLServer(accountUrl, catalogUrl, orderUrl string) (*Server, error) 
 	}
 
 	return &Server{
-		accountClient, 
-		catalogClient, 
+		accountClient,
+		catalogClient,
 		orderClient,
 	}, nil
 }
 
-
-func (s *Server) Mutation() MutationResolver{
+func (s *Server) Mutation() MutationResolver {
 	return &mutationResolver{
-		server: s, 
+		server: s,
 	}
 }
 
-func (s *Server) Query() QueryResolver{
-	return  &queryResolver{
-		server: s, 
+func (s *Server) Query() QueryResolver {
+	return &queryResolver{
+		server: s,
 	}
 }
 
-func (s *Server) Account() QueryResolver{
-	return  &accountResolver{
-		server: s, 
+func (s *Server) Account() AccountResolver {
+	return &accountResolver{
+		server: s,
 	}
 }
 
-
-func (s *Server) ToExecutablesSchema() graphql.ExecutableSchem{
-	return  NewExecutableSchema(Config{
-		Resolvers: s, 
+func (s *Server) ToExecutableSchema() graphql.ExecutableSchema {
+	return NewExecutableSchema(Config{
+		Resolvers: s,
 	})
 }
