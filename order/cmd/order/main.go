@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/akhilsharma90/go-graphql-microservice/order"
+		"github.com/saurabhdhingra/go-microservices/order"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/tinrab/retry"
 )
